@@ -61,7 +61,22 @@ const clientesMock = [
         },
         fone: "(41) 99999-9999",
         email: "contato@clienteA.com"
-    }
+    },
+    {
+        id: 2,
+        nome: "Gustavo",
+        cpf: "123.456.789-10",
+        endereco: { 
+            logradouro: "Rua Abrelino", 
+            numero: "125", 
+            complemento: "Casa", 
+            bairro: "Centro", 
+            cidade: "Foz", 
+            estado: "PR" 
+        },
+        fone: "(41) 99999-9999",
+        email: "contato@clienteA.com"
+    },
 ];
 
 // ------------------------------------------------------------------
