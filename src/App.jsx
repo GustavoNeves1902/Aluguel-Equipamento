@@ -13,14 +13,10 @@ const tiposEquipamentoMock = [
   { id: 3, nome: "Monitor" },
 ];
 
-const fabricantesMock = [
-  { id: 1, codigo: "FAB001", nome: "Dell", cnpj: "00.000.000/0001-00", enderecoId: 1, numero: "123", complemento: "Sala 01" },
-  { id: 2, codigo: "FAB002", nome: "HP", cnpj: "11.111.111/0001-11", enderecoId: 2, numero: "500", complemento: "" },
-];
-
+// Equipamentos agora sem referência a fabricante e características
 const equipamentosMock = [
-  { id: 1, codigo: "EQ001", nome: "Latitude 5420", tipoId: 1, fabricanteId: 1, valorDiaria: 120.0, caracteristicasValores: {} },
-  { id: 2, codigo: "EQ002", nome: "ProDesk 400", tipoId: 2, fabricanteId: 2, valorDiaria: 95.5, caracteristicasValores: {} },
+  { id: 1, codigo: "EQ001", nome: "Latitude 5420", tipoId: 1, valorDiaria: 120.0 },
+  { id: 2, codigo: "EQ002", nome: "ProDesk 400", tipoId: 2, valorDiaria: 95.5 },
 ];
 
 const clientesMock = [
@@ -32,11 +28,6 @@ const clientesMock = [
     fone: "(41) 99999-9999",
     email: "contato@clienteA.com"
   }
-];
-
-const caracteristicasMock = [
-  { id: 1, nome: "Processador", unidade: "GHz" },
-  { id: 2, nome: "Memória RAM", unidade: "GB" },
 ];
 
 /* ===================== UTIL HELPERS ===================== */
@@ -160,76 +151,11 @@ function TiposEquipamentoPage({ tipos, onAddTipo, onRemoveTipo }) {
   );
 }
 
-/* Fabricantes Page */
-function FabricantesPage({ fabricantes, enderecos, onAddFabricante }) {
+/* Equipamentos Page (Simplificada) */
+function EquipamentosPage({ equipamentos, tiposEquipamento, onAddEquipamento }) {
   const [busca, setBusca] = useState("");
-  const [form, setForm] = useState({ codigo: "", nome: "", cnpj: "", enderecoId: "", numero: "", complemento: "" });
-
-  const filtrados = fabricantes.filter((f) => {
-    const enderecoStr = f.enderecoCompleto || "";
-    return `${f.nome} ${f.codigo} ${enderecoStr}`.toLowerCase().includes(busca.toLowerCase());
-  });
-
-  function submit(e) {
-    e.preventDefault();
-    onAddFabricante(form);
-    setForm({ codigo: "", nome: "", cnpj: "", enderecoId: "", numero: "", complemento: "" });
-  }
-
-  return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Fabricantes</h2>
-
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <div className="flex gap-2 mb-3">
-          <input className="flex-1 p-2 border rounded" placeholder="Buscar fabricante..." value={busca} onChange={(e) => setBusca(e.target.value)} />
-        </div>
-
-        <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <input className="p-2 border rounded col-span-1" placeholder="Código" value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} />
-          <input className="p-2 border rounded col-span-2" placeholder="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
-          <input className="p-2 border rounded col-span-3" placeholder="CNPJ" value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} />
-
-          <select className="p-2 border rounded" value={form.enderecoId} onChange={(e) => setForm({ ...form, enderecoId: e.target.value })}>
-            <option value="">Selecione endereço (pré-cadastrado)</option>
-            {enderecos.map((en) => <option key={en.id} value={en.id}>{en.logradouro} — {en.cidade}/{en.estado}</option>)}
-          </select>
-
-          <input className="p-2 border rounded" placeholder="Número" value={form.numero} onChange={(e) => setForm({ ...form, numero: e.target.value })} />
-          <input className="p-2 border rounded" placeholder="Complemento" value={form.complemento} onChange={(e) => setForm({ ...form, complemento: e.target.value })} />
-
-          <div className="md:col-span-3 flex gap-2">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded" type="submit">Cadastrar Fabricante</button>
-            <button type="button" className="px-4 py-2 bg-gray-100 rounded" onClick={() => setForm({ codigo: "", nome: "", cnpj: "", enderecoId: "", numero: "", complemento: "" })}>Limpar</button>
-          </div>
-        </form>
-      </div>
-
-      <div className="space-y-2">
-        {filtrados.length === 0 && <div className="text-gray-500">Nenhum fabricante encontrado.</div>}
-        {filtrados.map((f) => (
-          <div key={f.id} className="p-3 bg-white rounded shadow">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="font-medium">{f.nome} <span className="text-xs text-gray-500 ml-2">({f.codigo})</span></div>
-                <div className="text-sm text-gray-500">CNPJ: {f.cnpj}</div>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-gray-600">
-              {f.enderecoCompleto || "Endereço não informado"}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* Equipamentos Page */
-function EquipamentosPage({ equipamentos, tiposEquipamento, fabricantes, caracteristicas, onAddEquipamento }) {
-  const [busca, setBusca] = useState("");
-  const [form, setForm] = useState({ codigo: "", nome: "", tipoId: "", fabricanteId: "", valorDiaria: "" });
-  const [caractValores, setCaractValores] = useState({});
+  // Removido fabricanteId e caracteristicasValores do estado
+  const [form, setForm] = useState({ codigo: "", nome: "", tipoId: "", valorDiaria: "" });
 
   const filtrados = equipamentos.filter((e) => `${e.nome} ${e.codigo}`.toLowerCase().includes(busca.toLowerCase()));
 
@@ -238,17 +164,10 @@ function EquipamentosPage({ equipamentos, tiposEquipamento, fabricantes, caracte
     const payload = {
       ...form,
       tipoId: form.tipoId ? Number(form.tipoId) : null,
-      fabricanteId: form.fabricanteId ? Number(form.fabricanteId) : null,
       valorDiaria: Number(form.valorDiaria) || 0,
-      caracteristicasValores: { ...caractValores },
     };
     onAddEquipamento(payload);
-    setForm({ codigo: "", nome: "", tipoId: "", fabricanteId: "", valorDiaria: "" });
-    setCaractValores({});
-  }
-
-  function handleCaract(id, value) {
-    setCaractValores(prev => ({ ...prev, [id]: value }));
+    setForm({ codigo: "", nome: "", tipoId: "", valorDiaria: "" });
   }
 
   return (
@@ -263,31 +182,17 @@ function EquipamentosPage({ equipamentos, tiposEquipamento, fabricantes, caracte
         <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input className="p-2 border rounded" placeholder="Código" value={form.codigo} onChange={(e) => setForm({ ...form, codigo: e.target.value })} />
           <input className="p-2 border rounded col-span-2" placeholder="Nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
+          
           <select className="p-2 border rounded" value={form.tipoId} onChange={(e) => setForm({ ...form, tipoId: e.target.value })}>
             <option value="">Selecione tipo</option>
             {tiposEquipamento.map(t => <option key={t.id} value={t.id}>{t.nome}</option>)}
           </select>
-          <select className="p-2 border rounded" value={form.fabricanteId} onChange={(e) => setForm({ ...form, fabricanteId: e.target.value })}>
-            <option value="">Selecione fabricante</option>
-            {fabricantes.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
-          </select>
+          
           <input className="p-2 border rounded" placeholder="Valor diária (R$)" type="number" value={form.valorDiaria} onChange={(e) => setForm({ ...form, valorDiaria: e.target.value })} />
-
-          <div className="md:col-span-3">
-            <div className="text-sm font-semibold mb-2">Características técnicas (preencher valores)</div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              {caracteristicas.map(c => (
-                <div key={c.id}>
-                  <label className="block text-sm mb-1">{c.nome} ({c.unidade})</label>
-                  <input className="p-2 border rounded w-full" value={caractValores[c.id] || ""} onChange={(e) => handleCaract(c.id, e.target.value)} placeholder={`Valor (${c.unidade})`} />
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="md:col-span-3 flex gap-2">
             <button className="px-4 py-2 bg-blue-600 text-white rounded" type="submit">Cadastrar Equipamento</button>
-            <button type="button" className="px-4 py-2 bg-gray-100 rounded" onClick={() => { setForm({ codigo: "", nome: "", tipoId: "", fabricanteId: "", valorDiaria: "" }); setCaractValores({}); }}>Limpar</button>
+            <button type="button" className="px-4 py-2 bg-gray-100 rounded" onClick={() => setForm({ codigo: "", nome: "", tipoId: "", valorDiaria: "" })}>Limpar</button>
           </div>
         </form>
       </div>
@@ -296,79 +201,19 @@ function EquipamentosPage({ equipamentos, tiposEquipamento, fabricantes, caracte
         {filtrados.length === 0 && <div className="text-gray-500">Nenhum equipamento encontrado.</div>}
         {filtrados.map(eq => {
           const tipo = tiposEquipamento.find(t => t.id === eq.tipoId);
-          const fab = fabricantes.find(f => f.id === eq.fabricanteId);
           return (
             <div key={eq.id} className="p-3 bg-white rounded shadow">
               <div className="flex justify-between items-center">
                 <div>
                   <div className="font-medium">{eq.nome} <span className="text-xs text-gray-500 ml-2">({eq.codigo})</span></div>
-                  <div className="text-sm text-gray-500">Tipo: {tipo?.nome || "—"} • Fabricante: {fab?.nome || "—"}</div>
+                  <div className="text-sm text-gray-500">Tipo: {tipo?.nome || "—"}</div>
                 </div>
                 <div className="font-bold text-green-600">R$ {(Number(eq.valorDiaria) || 0).toFixed(2)}</div>
               </div>
-
-              {eq.caracteristicasValores && Object.keys(eq.caracteristicasValores).length > 0 && (
-                <div className="mt-2 text-sm">
-                  <strong>Características:</strong>
-                  <ul className="list-disc list-inside">
-                    {Object.entries(eq.caracteristicasValores).map(([id, v]) => {
-                      const c = caracteristicas.find(cc => cc.id === Number(id));
-                      return <li key={id}>{c?.nome || id}: {v} {c?.unidade || ""}</li>;
-                    })}
-                  </ul>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-/* Características Page */
-function CaracteristicasPage({ caracteristicas, onAdd, onRemove }) {
-  const [nome, setNome] = useState("");
-  const [unidade, setUnidade] = useState("");
-  const [busca, setBusca] = useState("");
-
-  const filtrados = caracteristicas.filter(c => `${c.nome} ${c.unidade}`.toLowerCase().includes(busca.toLowerCase()));
-
-  function submit(e) {
-    e.preventDefault();
-    if (!nome.trim()) return;
-    onAdd({ nome: nome.trim(), unidade: unidade.trim() });
-    setNome("");
-    setUnidade("");
-  }
-
-  return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">Características Técnicas</h2>
-
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <div className="flex gap-2 mb-3">
-          <input className="flex-1 p-2 border rounded" placeholder="Buscar..." value={busca} onChange={(e) => setBusca(e.target.value)} />
-        </div>
-
-        <form onSubmit={submit} className="flex gap-2">
-          <input className="p-2 border rounded flex-1" placeholder="Nome da característica" value={nome} onChange={(e) => setNome(e.target.value)} />
-          <input className="p-2 border rounded w-40" placeholder="Unidade (ex: GB)" value={unidade} onChange={(e) => setUnidade(e.target.value)} />
-          <button className="px-4 py-2 bg-blue-600 text-white rounded">Adicionar</button>
-        </form>
-      </div>
-
-      <ul className="space-y-2">
-        {filtrados.map(c => (
-          <li key={c.id} className="p-3 bg-white rounded shadow flex justify-between items-center">
-            <div>
-              <div className="font-medium">{c.nome}</div>
-              <div className="text-sm text-gray-500">{c.unidade}</div>
-            </div>
-            <button className="text-red-500" onClick={() => onRemove(c.id)}>Remover</button>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
@@ -573,10 +418,8 @@ export default function App() {
 
   const [enderecos, setEnderecos] = useState(enderecosMock);
   const [tiposEquipamento, setTiposEquipamento] = useState(tiposEquipamentoMock);
-  const [fabricantes, setFabricantes] = useState(fabricantesMock);
   const [equipamentos, setEquipamentos] = useState(equipamentosMock);
   const [clientes, setClientes] = useState(clientesMock);
-  const [caracteristicas, setCaracteristicas] = useState(caracteristicasMock);
   const [alugueis, setAlugueis] = useState([]);
 
   /* formulário de aluguel */
@@ -599,9 +442,9 @@ export default function App() {
     setEnderecos(prev => [...prev, novo]);
   }
   function handleRemoveEndereco(id) {
-    if (!confirm("Remover endereço? Será desvinculado de fabricantes que o usam.")) return;
+    if (!confirm("Remover endereço?")) return;
     setEnderecos(prev => prev.filter(e => e.id !== id));
-    setFabricantes(prev => prev.map(f => (f.enderecoId === id ? { ...f, enderecoId: null, enderecoCompleto: null } : f)));
+    // Removida lógica que limpava endereços em fabricantes
   }
 
   // Tipos
@@ -615,25 +458,7 @@ export default function App() {
     setTiposEquipamento(prev => prev.filter(t => t.id !== id));
   }
 
-  // Fabricantes
-  function handleAddFabricante(form) {
-    if (!form.nome || !form.codigo) { alert("Código e nome são obrigatórios."); return; }
-    const enderecoBase = enderecos.find(en => en.id === Number(form.enderecoId));
-    const enderecoCompleto = enderecoBase ? `${enderecoBase.logradouro}${form.numero ? `, ${form.numero}` : ""}${form.complemento ? ` - ${form.complemento}` : ""} • ${enderecoBase.cidade}/${enderecoBase.estado} • CEP:${enderecoBase.cep}` : null;
-    const novo = {
-      id: Date.now(),
-      codigo: form.codigo,
-      nome: form.nome,
-      cnpj: form.cnpj || "",
-      enderecoId: form.enderecoId ? Number(form.enderecoId) : null,
-      numero: form.numero || "",
-      complemento: form.complemento || "",
-      enderecoCompleto
-    };
-    setFabricantes(prev => [...prev, novo]);
-  }
-
-  // Equipamentos
+  // Equipamentos (Simplificado)
   function handleAddEquipamento(form) {
     if (!form.nome || !form.codigo) { alert("Código e nome do equipamento são obrigatórios."); return; }
     const novo = {
@@ -641,31 +466,10 @@ export default function App() {
       codigo: form.codigo,
       nome: form.nome,
       tipoId: form.tipoId ? Number(form.tipoId) : null,
-      fabricanteId: form.fabricanteId ? Number(form.fabricanteId) : null,
       valorDiaria: form.valorDiaria ? Number(form.valorDiaria) : 0,
-      caracteristicasValores: form.caracteristicasValores || {},
+      // Removidas propriedades de fabricante e características
     };
     setEquipamentos(prev => [...prev, novo]);
-  }
-
-  // Características
-  function handleAddCaracteristica({ nome, unidade }) {
-    if (!nome) return;
-    const novo = { id: Date.now(), nome, unidade };
-    setCaracteristicas(prev => [...prev, novo]);
-  }
-  function handleRemoveCaracteristica(id) {
-    if (!confirm("Remover característica? Equipamentos com valores serão mantidos, mas a característica será removida da lista de cadastro.")) return;
-    setCaracteristicas(prev => prev.filter(c => c.id !== id));
-    setEquipamentos(prev => prev.map(eq => {
-      const copy = { ...eq };
-      if (copy.caracteristicasValores) {
-        const clone = { ...copy.caracteristicasValores };
-        delete clone[id];
-        copy.caracteristicasValores = clone;
-      }
-      return copy;
-    }));
   }
 
   // Clientes
@@ -702,16 +506,14 @@ export default function App() {
       <div className="max-w-6xl mx-auto">
         <header className="bg-blue-700 text-white p-6 rounded-t">
           <h1 className="text-2xl font-bold">Sistema de Gestão - Aluguéis e Ativos</h1>
-          <p className="text-sm text-blue-100">Gerencie endereços, fabricantes, equipamentos, tipos, clientes e aluguéis</p>
+          <p className="text-sm text-blue-100">Gerencie endereços, equipamentos, tipos, clientes e aluguéis</p>
         </header>
 
         <nav className="bg-white p-3 rounded-b shadow flex gap-2 mt-4 overflow-x-auto">
           <TabButton active={tab === "alugueis"} onClick={() => setTab("alugueis")}>Emissão de Aluguéis</TabButton>
           <TabButton active={tab === "clientes"} onClick={() => setTab("clientes")}>Clientes</TabButton>
           <TabButton active={tab === "equipamentos"} onClick={() => setTab("equipamentos")}>Equipamentos</TabButton>
-          <TabButton active={tab === "fabricantes"} onClick={() => setTab("fabricantes")}>Fabricantes</TabButton>
           <TabButton active={tab === "tipos"} onClick={() => setTab("tipos")}>Tipos</TabButton>
-          <TabButton active={tab === "caracteristicas"} onClick={() => setTab("caracteristicas")}>Características</TabButton>
           <TabButton active={tab === "enderecos"} onClick={() => setTab("enderecos")}>Endereços</TabButton>
         </nav>
 
@@ -736,22 +538,12 @@ export default function App() {
             <EquipamentosPage
               equipamentos={equipamentos}
               tiposEquipamento={tiposEquipamento}
-              fabricantes={fabricantes}
-              caracteristicas={caracteristicas}
               onAddEquipamento={handleAddEquipamento}
             />
           )}
 
-          {tab === "fabricantes" && (
-            <FabricantesPage fabricantes={fabricantes} enderecos={enderecos} onAddFabricante={handleAddFabricante} />
-          )}
-
           {tab === "tipos" && (
             <TiposEquipamentoPage tipos={tiposEquipamento} onAddTipo={handleAddTipo} onRemoveTipo={handleRemoveTipo} />
-          )}
-
-          {tab === "caracteristicas" && (
-            <CaracteristicasPage caracteristicas={caracteristicas} onAdd={handleAddCaracteristica} onRemove={handleRemoveCaracteristica} />
           )}
 
           {tab === "enderecos" && (
@@ -775,5 +567,3 @@ function TabButton({ children, onClick, active }) {
     </button>
   );
 }
-
-/* ===================== FIM DO ARQUIVO ===================== */
