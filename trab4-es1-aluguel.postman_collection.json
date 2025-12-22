@@ -1,0 +1,545 @@
+{
+	"info": {
+		"_postman_id": "0116d46e-000c-4e1d-9e18-d93ae780684d",
+		"name": "trab4-es1-aluguel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32205569",
+		"_collection_link": "https://gold-flare-2208.postman.co/workspace/Team-Workspace~dfb1c4d0-95df-4ce8-8a1b-275d7cc7d305/collection/32205569-0116d46e-000c-4e1d-9e18-d93ae780684d?action=share&source=collection_link&creator=32205569"
+	},
+	"item": [
+		{
+			"name": "Equipamento",
+			"item": [
+				{
+					"name": "Listar equipamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/equipamento",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"equipamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar equipamento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\r\n        \"id\": 1,\r\n        \"nome\": \"Motor W22 barato\",        \r\n        \"tipoEquipamento\": {\"id\": 1},\r\n        \"valorDiaria\": 100.32\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/equipamento/cadastrar",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"equipamento",
+								"cadastrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter equipamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/equipamento/id?id=2",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"equipamento",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TipoEquipamento",
+			"item": [
+				{
+					"name": "Listar tipo equipamento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/tipo-equipamento",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"tipo-equipamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar tipo equipamento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"nome\": \"computador\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/tipo-equipamento/cadastrar",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"tipo-equipamento",
+								"cadastrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar tipo equipamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/tipo-equipamento/id?id=3",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"tipo-equipamento",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente",
+			"item": [
+				{
+					"name": "Listar cliente",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cliente",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar cliente",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{            \r\n    \"nomeSocial\": \"Robert Silva\",\r\n    \"enderecoResidencial\": {\r\n        \"endereco\": {\r\n            \"id\": 3\r\n        },\r\n        \"complemento\": \"rua das flores\",    \r\n        \"nroCasa\": 1200\r\n    },\r\n    \"fones\": [\r\n        {\r\n            \"numero\": \"97733-3333\",\r\n            \"ddd\": {\r\n                \"id\": 3\r\n            },\r\n            \"ddi\": {\r\n                \"id\": 1                \r\n            }\r\n        }\r\n    ],\r\n    \"emails\": [\r\n        {\r\n            \"enderecoEmail\": \"beto.mende3s2@email.com\"\r\n        }\r\n    ],\r\n    \"cpf\": \"999.888.777-63\",\r\n    \"primeiroNome\": \"Robert\",\r\n    \"sobreNome\": \"Mend\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/cliente/cadastrar",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cliente",
+								"cadastrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar cliente por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cliente/id?id=6",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cliente",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "6"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pedido Aluguel Equipamento",
+			"item": [
+				{
+					"name": "Listar pedido aluguel equipamento",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/pedido-aluguel-equipamento",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"pedido-aluguel-equipamento"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Pedido Aluguel Equipamento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"nroAluguel\": \"ALG-2024-004\",\r\n    \"dataPedido\": \"2025-12-19\",\r\n    \"dataInicioLocacao\": \"2024-12-10\",\r\n    \"dataPrevistoDevolucao\": \"2024-12-20\",\r\n    \"valorDiaria\": 80.0,\r\n    \"valorLocacao\": 80.0,\r\n    \"equipamento\": {\r\n        \"id\": 3\r\n    },\r\n    \"cliente\": {\r\n        \"id\": 3\r\n    }\r\n} ",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/pedido-aluguel-equipamento/cadastrar",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"pedido-aluguel-equipamento",
+								"cadastrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar pedido aluguel equipamento por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/pedido-aluguel-equipamento/id?id=1",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"pedido-aluguel-equipamento",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Endereco",
+			"item": [
+				{
+					"name": "Listar endereco",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/endereco",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"endereco"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar endereco",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{        \r\n        \"cep\": \"222\",\r\n        \"cidade\": {\r\n            \"id\": 1            \r\n        },\r\n        \"bairro\": {\r\n            \"id\": 1\r\n        },\r\n        \"logradouro\": {\r\n            \"id\": 1\r\n        }\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/endereco/cadastrar",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"endereco",
+								"cadastrar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter endereco ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/endereco/id?id=2",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"endereco",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter cidade Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cidade/id?id=2",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cidade",
+								"id"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter cidades",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/cidade",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"cidade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter bairros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/bairro",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"bairro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter logradouros",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/logradouro",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"logradouro"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter endereco CEP",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/endereco/cep?cep=222",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"endereco",
+								"cep"
+							],
+							"query": [
+								{
+									"key": "cep",
+									"value": "222"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obter endereco externo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/endereco-externo/cep?cep=70040010",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"endereco-externo",
+								"cep"
+							],
+							"query": [
+								{
+									"key": "cep",
+									"value": "70040010"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Fone",
+			"item": [
+				{
+					"name": "Listar DDD",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/ddd",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"ddd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar DDI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/ddi",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"ddi"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
