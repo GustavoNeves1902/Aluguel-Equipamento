@@ -8,7 +8,13 @@ const todayISO = () => new Date().toISOString().split("T")[0];
 function daysBetween(start, end) {
   const a = new Date(start);
   const b = new Date(end);
-  return Math.max(1, Math.ceil((b - a) / (1000 * 60 * 60 * 24)));
+
+  // Zerando horas, minutos, segundos e ms
+  a.setHours(0, 0, 0, 0);
+  b.setHours(0, 0, 0, 0);
+
+  const diff = (b - a) / (1000 * 60 * 60 * 24);
+  return Math.max(1, diff); // garante pelo menos 1 diária
 }
 
 /* ===================== APP ===================== */
