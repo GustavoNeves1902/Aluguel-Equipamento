@@ -480,6 +480,13 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
     complemento: "",
   });
 
+  const [buscaId, setBuscaId] = useState("");
+
+  const clientesFiltrados = clientes.filter((c) => {
+    if (!buscaId) return true;
+    return String(c.id) === String(buscaId);
+  });
+
   return (
     <Card title="Clientes">
       <div className="grid grid-cols-3 gap-2">
@@ -571,10 +578,20 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
         Cadastrar Cliente
       </button>
 
+      <div className="mt-4">
+        <input
+          type="number"
+          className="border p-2 rounded w-48"
+          placeholder="Buscar cliente por ID"
+          value={buscaId}
+          onChange={(e) => setBuscaId(e.target.value)}
+        />
+      </div>
+
       <ul className="mt-4">
-        {clientes.map((c) => (
+        {clientesFiltrados.map((c) => (
           <li key={c.id}>
-            {c.primeiroNome} {c.sobreNome} —{" "}
+            <strong>ID {c.id}</strong> — {c.primeiroNome} {c.sobreNome} —{" "}
             {c.enderecoResidencial?.endereco?.logradouro?.tipoLogradouro?.sigla}{" "}
             {c.enderecoResidencial?.endereco?.logradouro?.nome} -{" "}
             {c.enderecoResidencial?.endereco?.cidade?.nome}
@@ -594,6 +611,12 @@ function AluguelPage({
   onSubmit,
   calcularTotal,
 }) {
+  const [buscaId, setBuscaId] = useState("");
+  const alugueisFiltrados = alugueis.filter((a) => {
+    if (!buscaId) return true;
+    return String(a.id) === String(buscaId);
+  });
+
   return (
     <Card title="Novo Aluguel">
       <div className="grid grid-cols-4 gap-2">
@@ -658,11 +681,22 @@ function AluguelPage({
         Registrar Aluguel
       </button>
 
+      <div className="mt-4">
+        <input
+          type="number"
+          className="border p-2 rounded w-48"
+          placeholder="Buscar aluguel por ID"
+          value={buscaId}
+          onChange={(e) => setBuscaId(e.target.value)}
+        />
+      </div>
+
       <ul className="mt-4">
-        {alugueis.map((a) => (
+        {alugueisFiltrados.map((a) => (
           <li key={a.id}>
-            {a.cliente.primeiroNome} {a.cliente.sobreNome} —{" "}{a.equipamento.nome}{" "}
-            -{" "}{a.nroAluguel} — R$ {a.valorLocacao}
+            <strong>ID {a.id}</strong> — {a.cliente.primeiroNome}{" "}
+            {a.cliente.sobreNome} — {a.equipamento.nome} - {a.nroAluguel} — R${" "}
+            {a.valorLocacao}
           </li>
         ))}
       </ul>
