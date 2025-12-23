@@ -654,6 +654,8 @@ function AluguelPage({
       <ul className="mt-4">
         {alugueis.map((a) => (
           <li key={a.id}>
+            {a.cliente.primeiroNome} {a.cliente.sobreNome} —
+            {a.equipamento.nome} - 
             {a.nroAluguel} — R$ {a.valorLocacao}
           </li>
         ))}
