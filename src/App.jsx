@@ -527,7 +527,11 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
           <option value="">Selecione o endereço</option>
           {enderecos.map((e) => (
             <option key={e.id} value={e.id}>
-              {e.logradouro?.nome} - {e.bairro?.nome} - {e.cidade?.nome}
+              {e.logradouro?.tipoLogradouro?.sigla} {e.logradouro?.nome}
+              {" - "}
+              {e.bairro?.nome}
+              {" - "}
+              {e.cidade?.nome}
             </option>
           ))}
         </select>
@@ -570,7 +574,10 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
       <ul className="mt-4">
         {clientes.map((c) => (
           <li key={c.id}>
-            {c.primeiroNome} {c.sobreNome}
+            {c.primeiroNome} {c.sobreNome} —{" "}
+            {c.enderecoResidencial?.endereco?.logradouro?.tipoLogradouro?.sigla}{" "}
+            {c.enderecoResidencial?.endereco?.logradouro?.nome} -{" "}
+            {c.enderecoResidencial?.endereco?.cidade?.nome}
           </li>
         ))}
       </ul>
@@ -654,9 +661,8 @@ function AluguelPage({
       <ul className="mt-4">
         {alugueis.map((a) => (
           <li key={a.id}>
-            {a.cliente.primeiroNome} {a.cliente.sobreNome} —
-            {a.equipamento.nome} - 
-            {a.nroAluguel} — R$ {a.valorLocacao}
+            {a.cliente.primeiroNome} {a.cliente.sobreNome} —{a.equipamento.nome}{" "}
+            -{a.nroAluguel} — R$ {a.valorLocacao}
           </li>
         ))}
       </ul>
@@ -683,16 +689,15 @@ function EnderecosPage({
 
   const enderecosFiltrados = enderecos.filter((e) => {
     if (buscaId && String(e.id) !== String(buscaId)) return false;
-  
+
     if (buscaCep) {
       const cepEndereco = e.cep.replace(/\D/g, "");
       const cepBusca = buscaCep.replace(/\D/g, "");
       if (cepEndereco !== cepBusca) return false;
     }
-  
+
     return true;
   });
-  
 
   return (
     <Card title="Endereços">
