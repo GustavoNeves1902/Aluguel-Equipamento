@@ -35,6 +35,11 @@ export default function App() {
     clienteId: "",
   });
 
+  const [enderecos, setEnderecos] = useState([]);
+  const [cidades, setCidades] = useState([]);
+  const [bairros, setBairros] = useState([]);
+  const [logradouros, setLogradouros] = useState([]);
+
   /* ===================== LOAD INICIAL ===================== */
 
   async function carregarTudo() {
@@ -42,6 +47,10 @@ export default function App() {
     setTiposEquipamento(await apiGet("/tipo-equipamento"));
     setEquipamentos(await apiGet("/equipamento"));
     setAlugueis(await apiGet("/pedido-aluguel-equipamento"));
+    setEnderecos(await apiGet("/endereco"));
+    setCidades(await apiGet("/cidade"));
+    setBairros(await apiGet("/bairro"));
+    setLogradouros(await apiGet("/logradouro"));
   }
 
   useEffect(() => {
@@ -102,18 +111,36 @@ export default function App() {
   }
 
   async function handleAddCliente(form) {
+    if (!form.enderecoId) {
+      alert("Selecione um endereço");
+      return;
+    }
+
     const payload = {
       primeiroNome: form.primeiroNome,
       sobreNome: form.sobreNome || "",
       cpf: form.cpf,
+
       emails: [{ enderecoEmail: form.email }],
-      fones: [{ numero: form.fone, ddd: { id: 1 }, ddi: { id: 1 } }],
+
+      fones: [
+        {
+          numero: form.fone,
+          ddd: { id: 3 },
+          ddi: { id: 1 },
+        },
+      ],
+
       enderecoResidencial: {
-        endereco: { id: 1 },
-        complemento: "Residencial",
-        nroCasa: 100,
+        endereco: {
+          id: Number(form.enderecoId), // 👈 vindo do select
+        },
+        complemento: form.complemento,
+        nroCasa: Number(form.nroCasa),
       },
     };
+
+    console.log("PAYLOAD CLIENTE:", payload);
 
     await apiPost("/cliente/cadastrar", payload);
     setClientes(await apiGet("/cliente"));
@@ -177,6 +204,25 @@ export default function App() {
     }
   }
 
+  async function handleAddEndereco(form) {
+    if (!form.cep || !form.cidadeId || !form.bairroId || !form.logradouroId) {
+      alert("Preencha todos os campos do endereço");
+      return;
+    }
+
+    const payload = {
+      cep: form.cep,
+      cidade: { id: Number(form.cidadeId) },
+      bairro: { id: Number(form.bairroId) },
+      logradouro: { id: Number(form.logradouroId) },
+    };
+
+    console.log("PAYLOAD ENDEREÇO:", payload);
+
+    await apiPost("/endereco/cadastrar", payload);
+    setEnderecos(await apiGet("/endereco"));
+  }
+
   /* ===================== UI ===================== */
 
   return (
@@ -209,6 +255,12 @@ export default function App() {
           <TabButton active={tab === "tipos"} onClick={() => setTab("tipos")}>
             Tipos
           </TabButton>
+          <TabButton
+            active={tab === "enderecos"}
+            onClick={() => setTab("enderecos")}
+          >
+            Endereços
+          </TabButton>
         </nav>
 
         <main className="mt-6 space-y-6">
@@ -223,7 +275,11 @@ export default function App() {
             />
           )}
           {tab === "clientes" && (
-            <ClientesPage clientes={clientes} onAdd={handleAddCliente} />
+            <ClientesPage
+              clientes={clientes}
+              enderecos={enderecos} // 👈 ESSENCIAL
+              onAdd={handleAddCliente}
+            />
           )}
           {tab === "alugueis" && (
             <AluguelPage
@@ -234,6 +290,15 @@ export default function App() {
               alugueis={alugueis}
               onSubmit={handleRegistrarAluguel}
               calcularTotal={calcularTotal}
+            />
+          )}
+          {tab === "enderecos" && (
+            <EnderecosPage
+              enderecos={enderecos}
+              cidades={cidades}
+              bairros={bairros}
+              logradouros={logradouros}
+              onAdd={handleAddEndereco}
             />
           )}
         </main>
@@ -403,50 +468,103 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
   );
 }
 
-function ClientesPage({ clientes, onAdd }) {
+function ClientesPage({ clientes, enderecos = [], onAdd }) {
   const [form, setForm] = useState({
     primeiroNome: "",
     sobreNome: "",
     cpf: "",
     email: "",
     fone: "",
+    enderecoId: "",
+    nroCasa: "",
+    complemento: "",
   });
 
   return (
     <Card title="Clientes">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <input
           className="border p-2"
-          placeholder="Nome"
+          placeholder="Primeiro nome"
+          value={form.primeiroNome}
           onChange={(e) => setForm({ ...form, primeiroNome: e.target.value })}
         />
+
         <input
           className="border p-2"
           placeholder="Sobrenome"
+          value={form.sobreNome}
           onChange={(e) => setForm({ ...form, sobreNome: e.target.value })}
         />
+
         <input
           className="border p-2"
           placeholder="CPF"
+          value={form.cpf}
           onChange={(e) => setForm({ ...form, cpf: e.target.value })}
         />
+
         <input
           className="border p-2"
           placeholder="Email"
+          value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
+
         <input
           className="border p-2"
           placeholder="Telefone"
+          value={form.fone}
           onChange={(e) => setForm({ ...form, fone: e.target.value })}
+        />
+
+        {/* ENDEREÇO PRÉ-CADASTRADO */}
+        <select
+          className="border p-2"
+          value={form.enderecoId}
+          onChange={(e) => setForm({ ...form, enderecoId: e.target.value })}
+        >
+          <option value="">Selecione o endereço</option>
+          {enderecos.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.logradouro?.nome} - {e.bairro?.nome} - {e.cidade?.nome}
+            </option>
+          ))}
+        </select>
+
+        <input
+          className="border p-2"
+          type="number"
+          placeholder="Número da casa"
+          value={form.nroCasa}
+          onChange={(e) => setForm({ ...form, nroCasa: e.target.value })}
+        />
+
+        <input
+          className="border p-2"
+          placeholder="Complemento"
+          value={form.complemento}
+          onChange={(e) => setForm({ ...form, complemento: e.target.value })}
         />
       </div>
 
       <button
         className="mt-3 px-4 py-2 bg-green-600 text-white rounded"
-        onClick={() => onAdd(form)}
+        onClick={() => {
+          onAdd(form);
+          setForm({
+            primeiroNome: "",
+            sobreNome: "",
+            cpf: "",
+            email: "",
+            fone: "",
+            enderecoId: "",
+            nroCasa: "",
+            complemento: "",
+          });
+        }}
       >
-        Cadastrar
+        Cadastrar Cliente
       </button>
 
       <ul className="mt-4">
@@ -537,6 +655,128 @@ function AluguelPage({
         {alugueis.map((a) => (
           <li key={a.id}>
             {a.nroAluguel} — R$ {a.valorLocacao}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+function EnderecosPage({
+  enderecos = [],
+  cidades = [],
+  bairros = [],
+  logradouros = [],
+  onAdd,
+}) {
+  const [form, setForm] = useState({
+    cep: "",
+    cidadeId: "",
+    bairroId: "",
+    logradouroId: "",
+  });
+
+  const [buscaId, setBuscaId] = useState("");
+  const [buscaCep, setBuscaCep] = useState("");
+
+  const enderecosFiltrados = enderecos.filter((e) => {
+    if (buscaId && String(e.id) !== String(buscaId)) return false;
+  
+    if (buscaCep) {
+      const cepEndereco = e.cep.replace(/\D/g, "");
+      const cepBusca = buscaCep.replace(/\D/g, "");
+      if (cepEndereco !== cepBusca) return false;
+    }
+  
+    return true;
+  });
+  
+
+  return (
+    <Card title="Endereços">
+      {/* ➕ CADASTRO */}
+      <div className="grid grid-cols-4 gap-2">
+        <input
+          className="border p-2"
+          placeholder="CEP"
+          value={form.cep}
+          onChange={(e) => setForm({ ...form, cep: e.target.value })}
+        />
+
+        <select
+          className="border p-2"
+          value={form.cidadeId}
+          onChange={(e) => setForm({ ...form, cidadeId: e.target.value })}
+        >
+          <option value="">Cidade</option>
+          {cidades.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nome}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="border p-2"
+          value={form.bairroId}
+          onChange={(e) => setForm({ ...form, bairroId: e.target.value })}
+        >
+          <option value="">Bairro</option>
+          {bairros.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.nome}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="border p-2"
+          value={form.logradouroId}
+          onChange={(e) => setForm({ ...form, logradouroId: e.target.value })}
+        >
+          <option value="">Logradouro</option>
+          {logradouros.map((l) => (
+            <option key={l.id} value={l.id}>
+              {l.nome}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <button
+        className="mt-3 px-4 py-2 bg-green-600 text-white rounded"
+        onClick={() => {
+          onAdd(form);
+          setForm({ cep: "", cidadeId: "", bairroId: "", logradouroId: "" });
+        }}
+      >
+        Cadastrar Endereço
+      </button>
+
+      {/* 🔎 FILTROS */}
+      <div className="mt-4 flex gap-2">
+        <input
+          type="number"
+          className="border p-2"
+          placeholder="Buscar por ID"
+          value={buscaId}
+          onChange={(e) => setBuscaId(e.target.value)}
+        />
+
+        <input
+          className="border p-2"
+          placeholder="Buscar por CEP"
+          value={buscaCep}
+          onChange={(e) => setBuscaCep(e.target.value)}
+        />
+      </div>
+
+      {/* 📋 LISTAGEM */}
+      <ul className="mt-4">
+        {enderecosFiltrados.map((e) => (
+          <li key={e.id}>
+            <strong>ID {e.id}</strong> — {e.logradouro?.nome}, {e.bairro?.nome},{" "}
+            {e.cidade?.nome} — CEP {e.cep}
           </li>
         ))}
       </ul>
