@@ -29,11 +29,6 @@ export default function App() {
     clienteId: "",
   });
 
-  const [enderecos, setEnderecos] = useState([]);
-  const [cidades, setCidades] = useState([]);
-  const [bairros, setBairros] = useState([]);
-  const [logradouros, setLogradouros] = useState([]);
-
   /* ===================== LOAD INICIAL ===================== */
 
   async function carregarTudo() {
@@ -41,10 +36,6 @@ export default function App() {
     setTiposEquipamento(await apiGet("/tipo-equipamento"));
     setEquipamentos(await apiGet("/equipamento"));
     setAlugueis(await apiGet("/pedido-aluguel-equipamento"));
-    setEnderecos(await apiGet("/endereco"));
-    setCidades(await apiGet("/cidade"));
-    setBairros(await apiGet("/bairro"));
-    setLogradouros(await apiGet("/logradouro"));
   }
 
   useEffect(() => {
@@ -54,6 +45,8 @@ export default function App() {
   /* ===================== CALCULO TOTAL (DERIVADO) ===================== */
 
   function calcularTotal() {
+    console.log("EQUIPAMENTOS:", equipamentos);
+    console.log("FORM:", aluguelForm);
     if (
       !aluguelForm.dataInicio ||
       !aluguelForm.dataDevolucao ||
@@ -64,12 +57,16 @@ export default function App() {
     const eq = equipamentos.find(
       (e) => String(e.id) === String(aluguelForm.equipamentoId)
     );
+
     if (!eq) return 0;
 
-    const diaria = Number(eq.valorDiaria || eq.valor_diaria || eq.valor);
+    const diaria =
+      Number(eq.valorDiaria) || Number(eq.valor_diaria) || Number(eq.valor);
+
     if (!diaria) return 0;
 
     const dias = daysBetween(aluguelForm.dataInicio, aluguelForm.dataDevolucao);
+
     return dias * diaria;
   }
 
@@ -88,65 +85,32 @@ export default function App() {
     }
 
     const payload = {
+      id: 1,
       nome: form.nome,
       valorDiaria: Number(form.valorDiaria),
-      tipoEquipamentoId: Number(form.tipoId),
+      tipoEquipamento: { id: Number(form.tipoId) },
     };
 
     await apiPost("/equipamento/cadastrar", payload);
     setEquipamentos(await apiGet("/equipamento"));
   }
 
-  async function handleAddEndereco(form) {
-    if (!form.cep || !form.cidadeId || !form.bairroId || !form.logradouroId) {
-      alert("Preencha todos os campos do endereço");
-      return;
-    }
-
-    const payload = {
-      cep: form.cep,
-      cidadeId: Number(form.cidadeId),
-      bairroId: Number(form.bairroId),
-      logradouroId: Number(form.logradouroId),
-    };
-
-    try {
-      await apiPost("/endereco/cadastrar", payload);
-      const enderecosAtualizados = await apiGet("/endereco");
-      setEnderecos(enderecosAtualizados);
-      alert("Endereço cadastrado com sucesso!");
-    } catch (err) {
-      console.error("Erro ao cadastrar endereço:", err);
-      alert("Erro ao cadastrar endereço (verifique o console)");
-    }
-  }
-
   async function handleAddCliente(form) {
-    if (!form.enderecoId || !form.nroCasa || !form.primeiroNome || !form.cpf) {
-      alert("Preencha todos os campos obrigatórios");
-      return;
-    }
-
     const payload = {
       primeiroNome: form.primeiroNome,
       sobreNome: form.sobreNome || "",
       cpf: form.cpf,
-      email: form.email,
-      fone: form.fone,
-      enderecoId: Number(form.enderecoId),
-      nroCasa: Number(form.nroCasa),
-      complemento: form.complemento || null,
+      emails: [{ enderecoEmail: form.email }],
+      fones: [{ numero: form.fone, ddd: { id: 1 }, ddi: { id: 1 } }],
+      enderecoResidencial: {
+        endereco: { id: 1 },
+        complemento: "Residencial",
+        nroCasa: 100,
+      },
     };
 
-    try {
-      await apiPost("/cliente/cadastrar", payload);
-      const clientesAtualizados = await apiGet("/cliente");
-      setClientes(clientesAtualizados);
-      alert("Cliente cadastrado com sucesso!");
-    } catch (err) {
-      console.error("Erro ao cadastrar cliente:", err);
-      alert("Erro ao cadastrar cliente (verifique o console)");
-    }
+    await apiPost("/cliente/cadastrar", payload);
+    setClientes(await apiGet("/cliente"));
   }
 
   async function handleRegistrarAluguel() {
@@ -166,29 +130,44 @@ export default function App() {
     const eq = equipamentos.find(
       (e) => String(e.id) === String(aluguelForm.equipamentoId)
     );
+
     if (!eq) {
       alert("Equipamento inválido");
       return;
     }
 
     const payload = {
+      // 🔴 NÃO ENVIE ID
       nroAluguel: `ALG-${Date.now()}`,
+
+      // 🔴 OBRIGATÓRIO
       dataPedido: aluguelForm.dataPedido,
+
       dataInicioLocacao: aluguelForm.dataInicio,
       dataPrevistoDevolucao: aluguelForm.dataDevolucao,
+
+      // 🔴 OBRIGATÓRIOS
       valorDiaria: Number(eq.valorDiaria),
       valorLocacao: Number(total),
-      equipamentoId: Number(aluguelForm.equipamentoId),
-      clienteId: Number(aluguelForm.clienteId),
+
+      equipamento: {
+        id: Number(aluguelForm.equipamentoId),
+      },
+      cliente: {
+        id: Number(aluguelForm.clienteId),
+      },
     };
+
+    console.log("PAYLOAD FINAL (IGUAL AO BACKEND):");
+    console.log(JSON.stringify(payload, null, 2));
 
     try {
       await apiPost("/pedido-aluguel-equipamento/cadastrar", payload);
       alert("Aluguel registrado com sucesso!");
       carregarTudo();
     } catch (err) {
-      console.error("Erro ao salvar aluguel:", err);
-      alert("Erro ao registrar aluguel");
+      console.error("Erro real:", err);
+      alert("Erro ao salvar aluguel");
     }
   }
 
@@ -224,12 +203,6 @@ export default function App() {
           <TabButton active={tab === "tipos"} onClick={() => setTab("tipos")}>
             Tipos
           </TabButton>
-          <TabButton
-            active={tab === "enderecos"}
-            onClick={() => setTab("enderecos")}
-          >
-            Endereços
-          </TabButton>
         </nav>
 
         <main className="mt-6 space-y-6">
@@ -244,11 +217,7 @@ export default function App() {
             />
           )}
           {tab === "clientes" && (
-            <ClientesPage
-              clientes={clientes}
-              enderecos={enderecos}
-              onAdd={handleAddCliente}
-            />
+            <ClientesPage clientes={clientes} onAdd={handleAddCliente} />
           )}
           {tab === "alugueis" && (
             <AluguelPage
@@ -259,15 +228,6 @@ export default function App() {
               alugueis={alugueis}
               onSubmit={handleRegistrarAluguel}
               calcularTotal={calcularTotal}
-            />
-          )}
-          {tab === "enderecos" && (
-            <EnderecosPage
-              enderecos={enderecos}
-              cidades={cidades}
-              bairros={bairros}
-              logradouros={logradouros}
-              onAdd={handleAddEndereco}
             />
           )}
         </main>
@@ -304,6 +264,13 @@ function Card({ title, children }) {
 
 function TiposPage({ tipos, onAdd }) {
   const [nome, setNome] = useState("");
+  const [buscaId, setBuscaId] = useState("");
+
+  const tiposFiltrados = tipos.filter((t) => {
+    if (!buscaId) return true;
+    return String(t.id) === String(buscaId);
+  });
+
   return (
     <Card title="Tipos de Equipamento">
       <input
@@ -311,6 +278,7 @@ function TiposPage({ tipos, onAdd }) {
         value={nome}
         onChange={(e) => setNome(e.target.value)}
       />
+
       <button
         className="px-4 py-2 bg-blue-600 text-white rounded"
         onClick={() => {
@@ -320,8 +288,24 @@ function TiposPage({ tipos, onAdd }) {
       >
         Adicionar
       </button>
+
+      {/* 🔎 BUSCA POR ID */}
+      <div className="mt-4">
+        <input
+          type="number"
+          className="border p-2 rounded w-48"
+          placeholder="Buscar tipo por ID"
+          value={buscaId}
+          onChange={(e) => setBuscaId(e.target.value)}
+        />
+      </div>
+
       <ul className="mt-4">
-        {tipos.map((t) => (
+        {tiposFiltrados.length === 0 && (
+          <li className="text-gray-500">Nenhum tipo encontrado</li>
+        )}
+
+        {tiposFiltrados.map((t) => (
           <li key={t.id}>
             <strong>ID {t.id}</strong> — {t.nome}
           </li>
@@ -332,7 +316,19 @@ function TiposPage({ tipos, onAdd }) {
 }
 
 function EquipamentosPage({ equipamentos, tipos, onAdd }) {
-  const [form, setForm] = useState({ nome: "", valorDiaria: "", tipoId: "" });
+  const [form, setForm] = useState({
+    nome: "",
+    valorDiaria: "",
+    tipoId: "",
+  });
+
+  const [buscaId, setBuscaId] = useState("");
+
+  const equipamentosFiltrados = equipamentos.filter((e) => {
+    if (!buscaId) return true;
+    return String(e.id) === String(buscaId);
+  });
+
   return (
     <Card title="Equipamentos">
       <div className="grid grid-cols-3 gap-2">
@@ -342,6 +338,7 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
           value={form.nome}
           onChange={(e) => setForm({ ...form, nome: e.target.value })}
         />
+
         <input
           className="border p-2 rounded"
           type="number"
@@ -349,6 +346,7 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
           value={form.valorDiaria}
           onChange={(e) => setForm({ ...form, valorDiaria: e.target.value })}
         />
+
         <select
           className="border p-2 rounded"
           value={form.tipoId}
@@ -362,6 +360,7 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
           ))}
         </select>
       </div>
+
       <button
         className="mt-3 px-4 py-2 bg-blue-600 text-white rounded"
         onClick={() => {
@@ -371,8 +370,24 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
       >
         Cadastrar
       </button>
+
+      {/* 🔎 BUSCA POR ID */}
+      <div className="mt-4">
+        <input
+          type="number"
+          className="border p-2 rounded w-48"
+          placeholder="Buscar por ID"
+          value={buscaId}
+          onChange={(e) => setBuscaId(e.target.value)}
+        />
+      </div>
+
       <ul className="mt-4">
-        {equipamentos.map((e) => (
+        {equipamentosFiltrados.length === 0 && (
+          <li className="text-gray-500">Nenhum equipamento encontrado</li>
+        )}
+
+        {equipamentosFiltrados.map((e) => (
           <li key={e.id}>
             <strong>ID {e.id}</strong> — {e.nome} — R$ {e.valorDiaria}
           </li>
@@ -382,97 +397,53 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
   );
 }
 
-function ClientesPage({ clientes, enderecos, onAdd }) {
+function ClientesPage({ clientes, onAdd }) {
   const [form, setForm] = useState({
     primeiroNome: "",
     sobreNome: "",
     cpf: "",
     email: "",
     fone: "",
-    enderecoId: "",
-    nroCasa: "",
-    complemento: "",
   });
+
   return (
     <Card title="Clientes">
       <div className="grid grid-cols-5 gap-2">
         <input
           className="border p-2"
           placeholder="Nome"
-          value={form.primeiroNome}
           onChange={(e) => setForm({ ...form, primeiroNome: e.target.value })}
         />
         <input
           className="border p-2"
           placeholder="Sobrenome"
-          value={form.sobreNome}
           onChange={(e) => setForm({ ...form, sobreNome: e.target.value })}
         />
         <input
           className="border p-2"
           placeholder="CPF"
-          value={form.cpf}
           onChange={(e) => setForm({ ...form, cpf: e.target.value })}
         />
         <input
           className="border p-2"
           placeholder="Email"
-          value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
           className="border p-2"
           placeholder="Telefone"
-          value={form.fone}
           onChange={(e) => setForm({ ...form, fone: e.target.value })}
         />
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-2">
-        <select
-          className="border p-2"
-          value={form.enderecoId}
-          onChange={(e) => setForm({ ...form, enderecoId: e.target.value })}
-        >
-          <option value="">Selecione um endereço</option>
-          {enderecos.map((end) => (
-            <option key={end.id} value={end.id}>
-              {end.logradouro.tipoLogradouro.sigla} {end.logradouro.nome},{" "}
-              {end.bairro.nome} – {end.cidade.nome} (CEP {end.cep})
-            </option>
-          ))}
-        </select>
-        <input
-          className="border p-2"
-          placeholder="Número da casa"
-          value={form.nroCasa}
-          onChange={(e) => setForm({ ...form, nroCasa: e.target.value })}
-        />
-        <input
-          className="border p-2"
-          placeholder="Complemento"
-          value={form.complemento}
-          onChange={(e) => setForm({ ...form, complemento: e.target.value })}
-        />
-      </div>
+
       <button
         className="mt-3 px-4 py-2 bg-green-600 text-white rounded"
-        onClick={() => {
-          onAdd(form);
-          setForm({
-            primeiroNome: "",
-            sobreNome: "",
-            cpf: "",
-            email: "",
-            fone: "",
-            enderecoId: "",
-            nroCasa: "",
-            complemento: "",
-          });
-        }}
+        onClick={() => onAdd(form)}
       >
         Cadastrar
       </button>
-      <ul className="mt-4 space-y-1">
+
+      <ul className="mt-4">
         {clientes.map((c) => (
           <li key={c.id}>
             {c.primeiroNome} {c.sobreNome}
@@ -503,6 +474,7 @@ function AluguelPage({
             setForm((f) => ({ ...f, dataInicio: e.target.value }))
           }
         />
+
         <input
           type="date"
           className="border p-2"
@@ -511,6 +483,7 @@ function AluguelPage({
             setForm((f) => ({ ...f, dataDevolucao: e.target.value }))
           }
         />
+
         <select
           className="border p-2"
           value={form.equipamentoId}
@@ -525,6 +498,7 @@ function AluguelPage({
             </option>
           ))}
         </select>
+
         <select
           className="border p-2"
           value={form.clienteId}
@@ -540,9 +514,11 @@ function AluguelPage({
           ))}
         </select>
       </div>
+
       <div className="mt-3 font-bold">
         Total: R$ {calcularTotal().toFixed(2)}
       </div>
+
       <button
         type="button"
         className="mt-3 px-4 py-2 bg-blue-600 text-white rounded"
@@ -550,84 +526,11 @@ function AluguelPage({
       >
         Registrar Aluguel
       </button>
+
       <ul className="mt-4">
         {alugueis.map((a) => (
           <li key={a.id}>
             {a.nroAluguel} — R$ {a.valorLocacao}
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
-function EnderecosPage({ enderecos, cidades, bairros, logradouros, onAdd }) {
-  const [form, setForm] = useState({
-    cep: "",
-    cidadeId: "",
-    bairroId: "",
-    logradouroId: "",
-  });
-  return (
-    <Card title="Cadastro de Endereços">
-      <div className="grid grid-cols-4 gap-2">
-        <input
-          className="border p-2"
-          placeholder="CEP"
-          value={form.cep}
-          onChange={(e) => setForm({ ...form, cep: e.target.value })}
-        />
-        <select
-          className="border p-2"
-          value={form.cidadeId}
-          onChange={(e) => setForm({ ...form, cidadeId: e.target.value })}
-        >
-          <option value="">Cidade</option>
-          {cidades.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nome}
-            </option>
-          ))}
-        </select>
-        <select
-          className="border p-2"
-          value={form.bairroId}
-          onChange={(e) => setForm({ ...form, bairroId: e.target.value })}
-        >
-          <option value="">Bairro</option>
-          {bairros.map((b) => (
-            <option key={b.id} value={b.id}>
-              {b.nome}
-            </option>
-          ))}
-        </select>
-        <select
-          className="border p-2"
-          value={form.logradouroId}
-          onChange={(e) => setForm({ ...form, logradouroId: e.target.value })}
-        >
-          <option value="">Logradouro</option>
-          {logradouros.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.tipo} {l.nome}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button
-        className="mt-3 px-4 py-2 bg-green-600 text-white rounded"
-        onClick={() => {
-          onAdd(form);
-          setForm({ cep: "", cidadeId: "", bairroId: "", logradouroId: "" });
-        }}
-      >
-        Cadastrar
-      </button>
-      <ul className="mt-4">
-        {enderecos.map((e) => (
-          <li key={e.id}>
-            {e.logradouro?.tipo} {e.logradouro?.nome}, {e.bairro?.nome},{" "}
-            {e.cidade?.nome} — CEP {e.cep}
           </li>
         ))}
       </ul>
