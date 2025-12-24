@@ -8,6 +8,10 @@ export default defineConfig({
       "/aluguel": {
         target: "http://34.9.38.255:8080",
         changeOrigin: true,
+      },
+      "/chatbot": {
+        target: "http://34.9.38.255:8080",
+        changeOrigin: true,
         secure: false,
       },
     },

@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { apiGet, apiPost } from "./services/api";
+import { chatbotGet } from "./services/api";
+import {
+  listarClientes,
+  buscarClientePorId,
+  listarAlugueis,
+  buscarEquipamentoPorId,
+} from "./services/api";
 
 /* ===================== HELPERS ===================== */
 
@@ -261,6 +268,13 @@ export default function App() {
           >
             Endereços
           </TabButton>
+
+          <TabButton
+            active={tab === "chatbot"}
+            onClick={() => setTab("chatbot")}
+          >
+            Chatbot
+          </TabButton>
         </nav>
 
         <main className="mt-6 space-y-6">
@@ -301,6 +315,7 @@ export default function App() {
               onAdd={handleAddEndereco}
             />
           )}
+          {tab === "chatbot" && <ChatbotPage />}
         </main>
       </div>
     </div>
@@ -612,6 +627,7 @@ function AluguelPage({
   calcularTotal,
 }) {
   const [buscaId, setBuscaId] = useState("");
+
   const alugueisFiltrados = alugueis.filter((a) => {
     if (!buscaId) return true;
     return String(a.id) === String(buscaId);
@@ -822,5 +838,168 @@ function EnderecosPage({
         ))}
       </ul>
     </Card>
+  );
+}
+
+function ChatbotPage() {
+  const [mensagens, setMensagens] = useState([]);
+  const [texto, setTexto] = useState("");
+  const [loading, setLoading] = useState(false);
+  const fimRef = useRef(null);
+
+  /* 🔽 SCROLL AUTOMÁTICO */
+  useEffect(() => {
+    fimRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [mensagens]);
+
+  async function enviarMensagem() {
+    if (!texto.trim() || loading) return;
+
+    setMensagens((prev) => [...prev, { autor: "usuario", texto }]);
+    setTexto("");
+    setLoading(true);
+
+    try {
+      const resposta = await chatbotGet(texto);
+
+      setMensagens((prev) => [...prev, { autor: "bot", resposta }]);
+    } catch (err) {
+      setMensagens((prev) => [
+        ...prev,
+        {
+          autor: "bot",
+          erro: "Erro ao consultar o chatbot.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function renderClientes(lista = []) {
+    return (
+      <div className="space-y-2">
+        {lista.map((f) => (
+          <div key={f.id} className="border rounded p-2 bg-gray-50 text-sm">
+            <strong>{f.nome}</strong>
+            <div className="text-gray-600">{f.nomeSocial}</div>
+            <div>CNPJ: {f.cnpj}</div>
+
+            {f.enderecoResidencial && (
+              <div className="text-gray-500">
+                {f.enderecoResidencial.endereco.logradouro.tipoLogradouro.sigla}{" "}
+                {f.enderecoResidencial.endereco.logradouro.nome},{" "}
+                {f.enderecoResidencial.nroCasa} –{" "}
+                {f.enderecoResidencial.endereco.cidade.nome}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function renderEquipamentos(lista = []) {
+    return (
+      <ul className="space-y-2">
+        {lista.map((e) => (
+          <li key={e.id} className="border rounded p-2 bg-gray-50">
+            <strong>{e.nome}</strong> — R$ {e.valorDiaria}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderAlugueis(lista = []) {
+    return (
+      <ul className="space-y-2">
+        {lista.map((a) => (
+          <li key={a.id} className="border rounded p-2 bg-gray-50">
+            {a.nroAluguel} — {a.cliente.nome} — {a.equipamento.nome} — R${" "}
+            {a.valorLocacao}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  function renderRespostaBot(resposta) {
+    if (resposta.mensagemPadrao) {
+      return <p>{resposta.mensagemPadrao}</p>;
+    }
+
+    switch (resposta.intencao) {
+      case "CONSULTAR_ALUGUEL_CLIENTES":
+      case "CONSULTAR_ALUGUEL_CLIENTES_ID":
+        return renderClientes(resposta.dados);
+
+      case "CONSULTAR_ALUGUEL_EQUIPAMENTO":
+      case "CONSULTAR_ALUGUEL_EQUIPAMENTO_ID":
+        return renderEquipamentos(resposta.dados);
+
+      case "CONSULTAR_ALUGUEL_PEDIDO_ALUGUEL_EQUIPAMENTO":
+        return renderAlugueis(resposta.dados);
+
+      default:
+        return <p>Não sei como mostrar esse tipo de dado 🤔</p>;
+    }
+  }
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-white rounded shadow">
+      {/* HEADER */}
+      <div className="p-4 border-b font-semibold text-lg">
+        🤖 Chat do Sistema
+      </div>
+
+      {/* MENSAGENS */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">
+        {mensagens.map((m, i) => (
+          <div
+            key={i}
+            className={`max-w-[70%] p-3 rounded ${
+              m.autor === "usuario"
+                ? "ml-auto bg-blue-600 text-white"
+                : "mr-auto bg-white border"
+            }`}
+          >
+            {m.autor === "usuario" && <p>{m.texto}</p>}
+            {m.autor === "bot" && m.resposta && (
+              <div>{renderRespostaBot(m.resposta)}</div>
+            )}
+            {m.autor === "bot" && m.erro && (
+              <p className="text-red-600">{m.erro}</p>
+            )}
+          </div>
+        ))}
+
+        {loading && (
+          <div className="mr-auto bg-white border p-3 rounded text-sm">
+            Digitando...
+          </div>
+        )}
+
+        <div ref={fimRef} />
+      </div>
+
+      {/* INPUT */}
+      <div className="p-4 border-t flex gap-2">
+        <input
+          className="flex-1 border rounded px-3 py-2"
+          placeholder="Ex: buscar cliente id 5"
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && enviarMensagem()}
+        />
+        <button
+          className="bg-blue-600 text-white px-4 rounded"
+          onClick={enviarMensagem}
+          disabled={loading}
+        >
+          Enviar
+        </button>
+      </div>
+    </div>
   );
 }
