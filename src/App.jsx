@@ -629,10 +629,10 @@ function AluguelPage({
 
   return (
     <Card title="Novo Aluguel">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         <input
           type="date"
-          className="border p-2"
+          className="border p-2 col-span-1" 
           value={form.dataInicio}
           onChange={(e) =>
             setForm((f) => ({ ...f, dataInicio: e.target.value }))
@@ -641,7 +641,7 @@ function AluguelPage({
 
         <input
           type="date"
-          className="border p-2"
+          className="border p-2 col-span-1"
           value={form.dataDevolucao}
           onChange={(e) =>
             setForm((f) => ({ ...f, dataDevolucao: e.target.value }))
@@ -649,7 +649,7 @@ function AluguelPage({
         />
 
         <select
-          className="border p-2"
+          className="border p-2 col-span-2"
           value={form.equipamentoId}
           onChange={(e) =>
             setForm((f) => ({ ...f, equipamentoId: e.target.value }))
@@ -664,7 +664,7 @@ function AluguelPage({
         </select>
 
         <select
-          className="border p-2"
+          className="border p-2 col-span-1"
           value={form.clienteId}
           onChange={(e) =>
             setForm((f) => ({ ...f, clienteId: e.target.value }))
