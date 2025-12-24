@@ -1,12 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { apiGet, apiPost } from "./services/api";
 import { chatbotGet } from "./services/api";
-import {
-  listarClientes,
-  buscarClientePorId,
-  listarAlugueis,
-  buscarEquipamentoPorId,
-} from "./services/api";
 
 /* ===================== HELPERS ===================== */
 
@@ -847,7 +841,6 @@ function ChatbotPage() {
   const [loading, setLoading] = useState(false);
   const fimRef = useRef(null);
 
-  /* 🔽 SCROLL AUTOMÁTICO */
   useEffect(() => {
     fimRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens]);
@@ -855,12 +848,18 @@ function ChatbotPage() {
   async function enviarMensagem() {
     if (!texto.trim() || loading) return;
 
-    setMensagens((prev) => [...prev, { autor: "usuario", texto }]);
+    const textoUsuario = texto;
+
+    setMensagens((prev) => [
+      ...prev,
+      { autor: "usuario", texto: textoUsuario },
+    ]);
+
     setTexto("");
     setLoading(true);
 
     try {
-      const resposta = await chatbotGet(texto);
+      const resposta = await chatbotGet(textoUsuario);
 
       setMensagens((prev) => [...prev, { autor: "bot", resposta }]);
     } catch (err) {
@@ -868,59 +867,100 @@ function ChatbotPage() {
         ...prev,
         {
           autor: "bot",
-          erro: "Erro ao consultar o chatbot.",
+          resposta: {
+            mensagemPadrao: "Erro ao consultar o chatbot.",
+          },
         },
       ]);
     } finally {
       setLoading(false);
     }
   }
+  function renderClientes(clientes) {
+    if (!clientes || clientes.length === 0) {
+      return <p>Nenhum cliente encontrado.</p>;
+    }
 
-  function renderClientes(lista = []) {
     return (
       <div className="space-y-2">
-        {lista.map((f) => (
-          <div key={f.id} className="border rounded p-2 bg-gray-50 text-sm">
-            <strong>{f.nome}</strong>
-            <div className="text-gray-600">{f.nomeSocial}</div>
-            <div>CNPJ: {f.cnpj}</div>
+        <p className="font-semibold">Clientes cadastrados:</p>
 
-            {f.enderecoResidencial && (
-              <div className="text-gray-500">
-                {f.enderecoResidencial.endereco.logradouro.tipoLogradouro.sigla}{" "}
-                {f.enderecoResidencial.endereco.logradouro.nome},{" "}
-                {f.enderecoResidencial.nroCasa} –{" "}
-                {f.enderecoResidencial.endereco.cidade.nome}
-              </div>
-            )}
-          </div>
-        ))}
+        <ul className="space-y-1">
+          {clientes.map((c) => (
+            <li key={c.id} className="border rounded p-2 text-sm bg-gray-50">
+              <p>
+                <strong>ID:</strong> {c.id}
+              </p>
+              <p>
+                <strong>Nome:</strong> {c.nome}
+              </p>
+              <p>
+                <strong>Documento:</strong> {c.documento}
+              </p>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }
+  function renderEquipamentos(equipamentos) {
+    if (!equipamentos || equipamentos.length === 0) {
+      return <p>Nenhum equipamento encontrado.</p>;
+    }
 
-  function renderEquipamentos(lista = []) {
     return (
-      <ul className="space-y-2">
-        {lista.map((e) => (
-          <li key={e.id} className="border rounded p-2 bg-gray-50">
-            <strong>{e.nome}</strong> — R$ {e.valorDiaria}
-          </li>
-        ))}
-      </ul>
+      <div className="space-y-2">
+        <p className="font-semibold">Equipamentos:</p>
+
+        <ul className="space-y-1">
+          {equipamentos.map((e) => (
+            <li key={e.id} className="border rounded p-2 text-sm bg-gray-50">
+              <p>
+                <strong>ID:</strong> {e.id}
+              </p>
+              <p>
+                <strong>Nome:</strong> {e.nome}
+              </p>
+              <p>
+                <strong>Tipo:</strong> {e.tipoEquipamento}
+              </p>
+              <p>
+                <strong>Status:</strong> {e.status}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
+  function renderAlugueis(pedidos) {
+    if (!pedidos || pedidos.length === 0) {
+      return <p>Nenhum pedido de aluguel encontrado.</p>;
+    }
 
-  function renderAlugueis(lista = []) {
     return (
-      <ul className="space-y-2">
-        {lista.map((a) => (
-          <li key={a.id} className="border rounded p-2 bg-gray-50">
-            {a.nroAluguel} — {a.cliente.nome} — {a.equipamento.nome} — R${" "}
-            {a.valorLocacao}
-          </li>
-        ))}
-      </ul>
+      <div className="space-y-2">
+        <p className="font-semibold">Pedidos de aluguel:</p>
+
+        <ul className="space-y-1">
+          {pedidos.map((p) => (
+            <li key={p.id} className="border rounded p-2 text-sm bg-gray-50">
+              <p>
+                <strong>ID:</strong> {p.id}
+              </p>
+              <p>
+                <strong>Cliente:</strong> {p.cliente}
+              </p>
+              <p>
+                <strong>Equipamento:</strong> {p.equipamento}
+              </p>
+              <p>
+                <strong>Período:</strong> {p.dataInicio} → {p.dataFim}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
 
@@ -942,18 +982,20 @@ function ChatbotPage() {
         return renderAlugueis(resposta.dados);
 
       default:
-        return <p>Não sei como mostrar esse tipo de dado 🤔</p>;
+        return (
+          <p className="text-gray-600">
+            Não sei como mostrar essa informação ainda 🤔
+          </p>
+        );
     }
   }
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] bg-white rounded shadow">
-      {/* HEADER */}
       <div className="p-4 border-b font-semibold text-lg">
         🤖 Chat do Sistema
       </div>
 
-      {/* MENSAGENS */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">
         {mensagens.map((m, i) => (
           <div
@@ -968,9 +1010,6 @@ function ChatbotPage() {
             {m.autor === "bot" && m.resposta && (
               <div>{renderRespostaBot(m.resposta)}</div>
             )}
-            {m.autor === "bot" && m.erro && (
-              <p className="text-red-600">{m.erro}</p>
-            )}
           </div>
         ))}
 
@@ -983,11 +1022,10 @@ function ChatbotPage() {
         <div ref={fimRef} />
       </div>
 
-      {/* INPUT */}
       <div className="p-4 border-t flex gap-2">
         <input
           className="flex-1 border rounded px-3 py-2"
-          placeholder="Ex: buscar cliente id 5"
+          placeholder="Ex: e aí meu camarada, lista os clientes"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && enviarMensagem()}

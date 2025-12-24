@@ -27,38 +27,45 @@ export async function apiPost(path, body) {
 
   return res.json();
 }
-
-/* ===================== SISTEMA (SEM IA) ===================== */
-
-// CLIENTES
-export function listarClientes() {
-  return apiGet("/cliente");
-}
-
-export function buscarClientePorId(id) {
-  return apiGet(`/cliente/${id}`);
-}
-
-// ALUGUÉIS
-export function listarAlugueis() {
-  return apiGet("/pedido-aluguel-equipamento");
-}
-
-// EQUIPAMENTOS
-export function buscarEquipamentoPorId(id) {
-  return apiGet(`/equipamento/${id}`);
-}
-
 /* ===================== CHATBOT (IA) ===================== */
-
 export async function chatbotGet(mensagem) {
-  const res = await fetch(
-    `/chatbot/chatbot?mensagem=${encodeURIComponent(mensagem)}`
-  );
+  try {
+    const res = await fetch(
+      `/chatbot/chatbot?mensagem=${encodeURIComponent(mensagem)}`,
+      { cache: "no-store" }
+    );
 
-  if (!res.ok) {
-    throw new Error("Erro ao consultar chatbot");
+    const data = await res.json();
+
+    // 🔴 CASO: erro do Gemini veio como STRING dentro de mensagemPadrao
+    if (typeof data.mensagemPadrao === "string") {
+      try {
+        const erroGemini = JSON.parse(data.mensagemPadrao);
+
+        if (erroGemini?.error?.code === 429) {
+          return {
+            mensagemPadrao:
+              "Infelizmente, seu limite de perguntas foi atingido. Tente novamente mais tarde.",
+          };
+        }
+      } catch {
+        // se não for JSON válido, segue fluxo normal
+      }
+    }
+
+    // 🔴 OUTROS ERROS
+    if (data?.error) {
+      return {
+        mensagemPadrao: "Não foi possível processar sua pergunta no momento.",
+      };
+    }
+
+    // ✅ RESPOSTA NORMAL
+    return data;
+  } catch (error) {
+    return {
+      mensagemPadrao:
+        "O serviço de inteligência artificial está indisponível no momento.",
+    };
   }
-
-  return res.json();
 }
