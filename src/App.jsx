@@ -658,7 +658,7 @@ function AluguelPage({
           <option value="">Equipamento</option>
           {equipamentos.map((e) => (
             <option key={e.id} value={e.id}>
-              {e.nome}
+              {e.nome} - R${e.valorDiaria}
             </option>
           ))}
         </select>
