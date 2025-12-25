@@ -632,7 +632,7 @@ function AluguelPage({
       <div className="grid grid-cols-5 gap-2">
         <input
           type="date"
-          className="border p-2 col-span-1" 
+          className="border p-2 col-span-1"
           value={form.dataInicio}
           onChange={(e) =>
             setForm((f) => ({ ...f, dataInicio: e.target.value }))
@@ -877,25 +877,30 @@ function ChatbotPage() {
     }
   }
   function renderClientes(clientes) {
-    if (!clientes || clientes.length === 0) {
+    if (!clientes) {
       return <p>Nenhum cliente encontrado.</p>;
     }
 
+    // 🔑 Se vier um único cliente, transforma em array
+    const lista = Array.isArray(clientes) ? clientes : [clientes];
+
     return (
       <div className="space-y-2">
-        <p className="font-semibold">Clientes cadastrados:</p>
+        <p className="font-semibold">
+          {lista.length === 1 ? "Cliente encontrado:" : "Clientes cadastrados:"}
+        </p>
 
         <ul className="space-y-1">
-          {clientes.map((c) => (
+          {lista.map((c) => (
             <li key={c.id} className="border rounded p-2 text-sm bg-gray-50">
               <p>
                 <strong>ID:</strong> {c.id}
               </p>
               <p>
-                <strong>Nome:</strong> {c.nome}
+                <strong>Nome:</strong> {c.primeiroNome} {c.sobreNome}
               </p>
               <p>
-                <strong>Documento:</strong> {c.documento}
+                <strong>CPF:</strong> {c.cpf}
               </p>
             </li>
           ))}
@@ -903,17 +908,24 @@ function ChatbotPage() {
       </div>
     );
   }
+
   function renderEquipamentos(equipamentos) {
     if (!equipamentos || equipamentos.length === 0) {
       return <p>Nenhum equipamento encontrado.</p>;
     }
 
+    const lista = Array.isArray(equipamentos) ? equipamentos : [equipamentos];
+
     return (
       <div className="space-y-2">
-        <p className="font-semibold">Equipamentos:</p>
+        <p className="font-semibold">
+          {lista.length === 1
+            ? "Equipamento encontrado:"
+            : "Equipamentos disponíveis:"}
+        </p>
 
         <ul className="space-y-1">
-          {equipamentos.map((e) => (
+          {lista.map((e) => (
             <li key={e.id} className="border rounded p-2 text-sm bg-gray-50">
               <p>
                 <strong>ID:</strong> {e.id}
@@ -922,10 +934,10 @@ function ChatbotPage() {
                 <strong>Nome:</strong> {e.nome}
               </p>
               <p>
-                <strong>Tipo:</strong> {e.tipoEquipamento}
+                <strong>Tipo:</strong> {e.tipoEquipamento?.nome}
               </p>
               <p>
-                <strong>Status:</strong> {e.status}
+                <strong>Valor diária:</strong> R$ {e.valorDiaria}
               </p>
             </li>
           ))}
@@ -933,29 +945,47 @@ function ChatbotPage() {
       </div>
     );
   }
+
   function renderAlugueis(pedidos) {
     if (!pedidos || pedidos.length === 0) {
       return <p>Nenhum pedido de aluguel encontrado.</p>;
     }
 
+    const lista = Array.isArray(pedidos) ? pedidos : [pedidos];
+
     return (
       <div className="space-y-2">
-        <p className="font-semibold">Pedidos de aluguel:</p>
+        <p className="font-semibold">
+          {lista.length === 1 ? "Aluguel encontrado:" : "Aluguéis cadastrados:"}
+        </p>
 
         <ul className="space-y-1">
-          {pedidos.map((p) => (
+          {lista.map((p) => (
             <li key={p.id} className="border rounded p-2 text-sm bg-gray-50">
               <p>
-                <strong>ID:</strong> {p.id}
+                <strong>Nº Aluguel:</strong> {p.nroAluguel}
               </p>
+
               <p>
-                <strong>Cliente:</strong> {p.cliente}
+                <strong>Cliente:</strong> {p.cliente?.primeiroNome}{" "}
+                {p.cliente?.sobreNome}
               </p>
+
               <p>
-                <strong>Equipamento:</strong> {p.equipamento}
+                <strong>Equipamento:</strong> {p.equipamento?.nome}
               </p>
+
               <p>
-                <strong>Período:</strong> {p.dataInicio} → {p.dataFim}
+                <strong>Período:</strong> {p.dataInicioLocacao} →{" "}
+                {p.dataPrevistoDevolucao}
+              </p>
+
+              <p>
+                <strong>Valor diária:</strong> R$ {p.valorDiaria}
+              </p>
+
+              <p>
+                <strong>Valor total:</strong> R$ {p.valorLocacao}
               </p>
             </li>
           ))}
