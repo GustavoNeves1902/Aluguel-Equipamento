@@ -603,7 +603,9 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
             <strong>ID {c.id}</strong> — {c.primeiroNome} {c.sobreNome} —{" "}
             {c.enderecoResidencial?.endereco?.logradouro?.tipoLogradouro?.sigla}{" "}
             {c.enderecoResidencial?.endereco?.logradouro?.nome} -{" "}
-            {c.enderecoResidencial?.endereco?.cidade?.nome}
+            {c.enderecoResidencial?.endereco?.cidade?.nome} - {"numero "}
+            {c.enderecoResidencial?.nroCasa} -{" "}
+            {c.enderecoResidencial?.complemento}
           </li>
         ))}
       </ul>
@@ -994,6 +996,25 @@ function ChatbotPage() {
     );
   }
 
+  function renderTipo(dados) {
+    const lista = Array.isArray(dados) ? dados : [dados];
+
+    return (
+      <ul className="space-y-2">
+        {lista.map((t) => (
+          <li key={t.id} className="border rounded p-2 text-sm bg-gray-50">
+            <p>
+              <strong>ID:</strong> {t.id}
+            </p>
+            <p>
+              <strong>Tipo:</strong> {t.nome}
+            </p>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   function renderRespostaBot(resposta) {
     if (resposta.mensagemPadrao) {
       return <p>{resposta.mensagemPadrao}</p>;
@@ -1010,6 +1031,10 @@ function ChatbotPage() {
 
       case "CONSULTAR_ALUGUEL_PEDIDO_ALUGUEL_EQUIPAMENTO":
         return renderAlugueis(resposta.dados);
+
+      case "CONSULTAR_ALUGUEL_TIPO_EQUIPAMENTO":
+      case "CONSULTAR_ALUGUEL_TIPO_EQUIPAMENTO_ID":
+        return renderTipo(resposta.dados);
 
       default:
         return (
