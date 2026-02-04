@@ -71,7 +71,7 @@ export default function App() {
       return 0;
 
     const eq = equipamentos.find(
-      (e) => String(e.id) === String(aluguelForm.equipamentoId)
+      (e) => String(e.id) === String(aluguelForm.equipamentoId),
     );
 
     if (!eq) return 0;
@@ -162,7 +162,7 @@ export default function App() {
     }
 
     const eq = equipamentos.find(
-      (e) => String(e.id) === String(aluguelForm.equipamentoId)
+      (e) => String(e.id) === String(aluguelForm.equipamentoId),
     );
 
     if (!eq) {
@@ -1051,14 +1051,24 @@ function ChatbotPage() {
         🤖 Chat do Sistema
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">
+      {/* Área de Mensagens */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+        {mensagens.length === 0 && (
+          <div className="text-center text-gray-400 mt-10">
+            <p>Olá! Sou o assistente virtual.</p>
+            <p className="text-sm">
+              Pergunte sobre equipamentos, clientes ou aluguéis.
+            </p>
+          </div>
+        )}
+
         {mensagens.map((m, i) => (
           <div
             key={i}
-            className={`max-w-[70%] p-3 rounded ${
+            className={`max-w-[75%] p-3 rounded-lg shadow-sm ${
               m.autor === "usuario"
-                ? "ml-auto bg-blue-600 text-white"
-                : "mr-auto bg-white border"
+                ? "ml-auto bg-blue-600 text-white rounded-br-none"
+                : "mr-auto bg-white border border-gray-200 rounded-bl-none text-gray-800"
             }`}
           >
             {m.autor === "usuario" && <p>{m.texto}</p>}
@@ -1069,7 +1079,7 @@ function ChatbotPage() {
         ))}
 
         {loading && (
-          <div className="mr-auto bg-white border p-3 rounded text-sm">
+          <div className="mr-auto bg-white border p-3 rounded-lg text-sm text-gray-500 italic animate-pulse">
             Digitando...
           </div>
         )}
