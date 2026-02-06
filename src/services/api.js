@@ -37,7 +37,7 @@ export async function chatbotGet(mensagem) {
 
     const data = await res.json();
 
-    // 🔴 CASO: erro do Gemini veio como STRING dentro de mensagemPadrao
+    // erro do Gemini
     if (typeof data.mensagemPadrao === "string") {
       try {
         const erroGemini = JSON.parse(data.mensagemPadrao);
@@ -53,14 +53,14 @@ export async function chatbotGet(mensagem) {
       }
     }
 
-    // 🔴 OUTROS ERROS
+    // OUTROS ERROS
     if (data?.error) {
       return {
         mensagemPadrao: "Não foi possível processar sua pergunta no momento.",
       };
     }
 
-    // ✅ RESPOSTA NORMAL
+    
     return data;
   } catch (error) {
     return {

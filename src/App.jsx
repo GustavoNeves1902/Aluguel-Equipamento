@@ -134,7 +134,7 @@ export default function App() {
 
       enderecoResidencial: {
         endereco: {
-          id: Number(form.enderecoId), // 👈 vindo do select
+          id: Number(form.enderecoId), //vindo do select
         },
         complemento: form.complemento,
         nroCasa: Number(form.nroCasa),
@@ -171,16 +171,14 @@ export default function App() {
     }
 
     const payload = {
-      // 🔴 NÃO ENVIE ID
-      nroAluguel: `ALG-${Date.now()}`,
 
-      // 🔴 OBRIGATÓRIO
+      nroAluguel: `ALG-${Date.now()}`,
+      
       dataPedido: aluguelForm.dataPedido,
 
       dataInicioLocacao: aluguelForm.dataInicio,
       dataPrevistoDevolucao: aluguelForm.dataDevolucao,
 
-      // 🔴 OBRIGATÓRIOS
       valorDiaria: Number(eq.valorDiaria),
       valorLocacao: Number(total),
 
@@ -285,7 +283,7 @@ export default function App() {
           {tab === "clientes" && (
             <ClientesPage
               clientes={clientes}
-              enderecos={enderecos} // 👈 ESSENCIAL
+              enderecos={enderecos} 
               onAdd={handleAddCliente}
             />
           )}
@@ -369,7 +367,7 @@ function TiposPage({ tipos, onAdd }) {
         Adicionar
       </button>
 
-      {/* 🔎 BUSCA POR ID */}
+      {/*BUSCA POR ID */}
       <div className="mt-4">
         <input
           type="number"
@@ -451,7 +449,7 @@ function EquipamentosPage({ equipamentos, tipos, onAdd }) {
         Cadastrar
       </button>
 
-      {/* 🔎 BUSCA POR ID */}
+      {/*BUSCA POR ID */}
       <div className="mt-4">
         <input
           type="number"
@@ -534,7 +532,7 @@ function ClientesPage({ clientes, enderecos = [], onAdd }) {
           onChange={(e) => setForm({ ...form, fone: e.target.value })}
         />
 
-        {/* ENDEREÇO PRÉ-CADASTRADO */}
+        {/*ENDEREÇO PRÉ-CADASTRADO*/}
         <select
           className="border p-2"
           value={form.enderecoId}
@@ -747,7 +745,7 @@ function EnderecosPage({
 
   return (
     <Card title="Endereços">
-      {/* ➕ CADASTRO */}
+      {/*CADASTRO */}
       <div className="grid grid-cols-4 gap-2">
         <input
           className="border p-2"
@@ -806,7 +804,7 @@ function EnderecosPage({
         Cadastrar Endereço
       </button>
 
-      {/* 🔎 FILTROS */}
+      {/*FILTROS */}
       <div className="mt-4 flex gap-2">
         <input
           type="number"
@@ -824,7 +822,7 @@ function EnderecosPage({
         />
       </div>
 
-      {/* 📋 LISTAGEM */}
+      {/*LISTAGEM */}
       <ul className="mt-4">
         {enderecosFiltrados.map((e) => (
           <li key={e.id}>
@@ -883,7 +881,7 @@ function ChatbotPage() {
       return <p>Nenhum cliente encontrado.</p>;
     }
 
-    // 🔑 Se vier um único cliente, transforma em array
+    //Se vier um único cliente, transforma em array
     const lista = Array.isArray(clientes) ? clientes : [clientes];
 
     return (
